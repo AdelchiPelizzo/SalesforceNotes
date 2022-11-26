@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:salesforcenotes/utils/user_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -16,39 +15,12 @@ class UserSettings extends StatefulWidget {
 class _UserSettingsState extends State<UserSettings> {
 
   final title = 'Salesforce Notes Settings';
-  
+
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   late final TextEditingController _key;
   late final TextEditingController _secret;
   late final TextEditingController _domain;
-
-  // final _storage = const FlutterSecureStorage();
-
-  // final String _userKey = 'userKey';
-  // final String _userSecret = 'userSecret';
-  // final String _domainName = 'domainName';
-
-  // Future setUserKey(String data) async {
-  //   await _storage.write(key: _userKey, value: data);
-  // }
-
-  // Future setUserSecret(String data) async {
-  //   await _storage.write(key: _userSecret, value: data);
-  // }
-
-  // Future setUserKeySecret(String key, String secret) async {
-  //   await setUserKey(key);
-  //   await setUserSecret(secret);
-  // }
-
-  // Future<String?> getUserKey() async {
-  //   return await _storage.read(key: _userKey);
-  // }
-
-  // Future<String?> getUserSecret() async {
-  //   return await _storage.read(key: _userSecret);
-  // }
 
   @override
   void initState() {
@@ -65,9 +37,9 @@ class _UserSettingsState extends State<UserSettings> {
     final domainName = await UserSecureStorage.getDomainName() ?? '';
 
     setState(() {
-      this._key.text = consumerKey;
-      this._secret.text = consumerSecret;
-      this._domain.text = domainName;
+      _key.text = consumerKey;
+      _secret.text = consumerSecret;
+      _domain.text = domainName;
     });
   }
 

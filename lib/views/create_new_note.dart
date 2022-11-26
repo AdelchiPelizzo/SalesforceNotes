@@ -68,7 +68,7 @@ class _NewNoteState extends State<NewNote> {
 
 
   Future<List<String>?> getSObjectsList() async {
-     SharedPreferences pref = await SharedPreferences.getInstance();
+    SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getStringList('key');
   }
 
@@ -143,7 +143,6 @@ class _NewNoteState extends State<NewNote> {
       );
     var respons = json.decode(response.body);
     var id18 = respons["id"].toString();
-    var id15 = id18.substring(0,15);
     final contentResponse = await http.post(
       contentEndpoint,
       headers: <String, String>{
@@ -226,19 +225,23 @@ class _NewNoteState extends State<NewNote> {
               tooltip: 'Pick Image from gallery',
               child: const Icon(Icons.add_a_photo),
             ),
-            Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Text(
-                widget.path,
-                style:  const TextStyle(
-                  fontFamily: 'Arial',
-                  fontSize: 20,
-                )
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(32.0),
+            //   child: Text(
+            //     widget.path,
+            //     style:  const TextStyle(
+            //       fontFamily: 'Arial',
+            //       fontSize: 20,
+            //     )
+            //   ),
+            // ),
             if(widget.path != '')
-            Expanded(
-              child: Image.file(File(widget.path)),
+            Flexible(child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Expanded(
+                child: Image.file(File(widget.path)),
+              ),
+              )
             ),
             // const AddMedia(),
             // DropdownButtonFormField<String>(

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:oauth2/oauth2.dart' as oauth2;
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:salesforcenotes/utils/user_secure_storage.dart';
 import 'package:salesforcenotes/views/create_new_note.dart';
@@ -35,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     _username = TextEditingController();
     _password = TextEditingController();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.initState();
   }
 
@@ -42,12 +43,12 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _username.dispose();
     _password.dispose();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.dispose();
   }
 
   // ignore: non_constant_identifier_names
   Future<String> Login(String username, String password) async {
-    String? domainName = await UserSecureStorage.getDomainName();
     String? identifier = await UserSecureStorage.getConsumerKey();
     String? secret = await UserSecureStorage.getConsumerSecret();
 
@@ -89,6 +90,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue.shade500,
       appBar: AppBar(
         title: Text(title),
         actions: <Widget>[
@@ -106,27 +108,48 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Column(
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              keyboardType: TextInputType.emailAddress,
-              autocorrect: false,
-              controller: _username,
-              decoration: const InputDecoration(hintText: 'Username'),
+            Container(
+              height: 100,
+              width: 100,
+              child: Image.asset('assets/icon/icon.png'),
+              
             ),
-            TextField(
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-              controller: _password,
-              decoration: const InputDecoration(hintText: 'Password'),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: TextField(
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
+                controller: _username,
+                decoration: const InputDecoration(
+                  filled: true, //<-- SEE HERE
+                  fillColor: Colors.white,
+                  hintText: 'Username',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: TextField(
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+                controller: _password,
+                decoration: const InputDecoration(
+                  filled: true, //<-- SEE HERE
+                  fillColor: Colors.white,
+                  hintText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(18.0),
               child: TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.yellow,
+                  backgroundColor: Colors.yellow.shade100,
                   foregroundColor: Colors.black54,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(
@@ -147,7 +170,9 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const NewNote(path: '',)),
+                        builder: (context) => const NewNote(
+                              path: '',
+                            )),
                   );
                 },
                 child: const Text('Login'),
