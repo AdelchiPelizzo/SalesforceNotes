@@ -30,12 +30,14 @@ class _HomePageState extends State<HomePage> {
   final title = 'Salesforce Notes';
   late final TextEditingController _username;
   late final TextEditingController _password;
+  bool _isObscure = true;
 
   @override
   void initState() {
     _username = TextEditingController();
     _password = TextEditingController();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    _isObscure = true;
     super.initState();
   }
 
@@ -110,11 +112,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
+            SizedBox(
               height: 100,
               width: 100,
               child: Image.asset('assets/icon/icon.png'),
-              
             ),
             Padding(
               padding: const EdgeInsets.all(15.0),
@@ -133,15 +134,23 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: TextField(
-                obscureText: true,
+                obscureText: _isObscure,
                 enableSuggestions: false,
                 autocorrect: false,
                 controller: _password,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   filled: true, //<-- SEE HERE
                   fillColor: Colors.white,
                   hintText: 'Password',
                   border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    onPressed: (() {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    }),
+                    icon: Icon(_isObscure ?  Icons.visibility_off : Icons.visibility ),
+                  ),
                 ),
               ),
             ),
