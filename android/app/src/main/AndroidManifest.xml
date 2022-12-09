@@ -3,7 +3,7 @@
    <application
         android:label="salesforcenotes"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/logo">
         <activity
             android:name=".MainActivity"
             android:exported="true"

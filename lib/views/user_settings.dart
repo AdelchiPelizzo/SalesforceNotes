@@ -17,9 +17,6 @@ class _UserSettingsState extends State<UserSettings> {
 
   final title = 'Salesforce Notes Settings';
 
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();  
-  final MetadataSalesforce _mds = MetadataSalesforce();
-
   late final TextEditingController _key;
   late final TextEditingController _secret;
   late final TextEditingController _domain;
@@ -53,43 +50,6 @@ class _UserSettingsState extends State<UserSettings> {
     super.dispose();
   }
   
-  // Future<List<String>> setSObjectsList() async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   print('prefs ...');
-  //   final metadataEndpoint = Uri(
-  //       scheme: 'https',
-  //       host: await UserSecureStorage.getDomainName() ?? '',
-  //       path: "/services/data/v56.0/tooling/query/",
-  //       query: 'q=SELECT+DeveloperName+FROM+CustomObject',
-  //     );
-  //   String? accessToken = await UserSecureStorage.getToken();
-  //   final response = await http.get(
-  //     metadataEndpoint,
-  //     headers: <String, String>{
-  //       'Content-Type': 'application/json',
-  //       'Authorization': 'Bearer $accessToken',
-  //     },
-  //   );
-  //   // print(metadataEndpoint);
-  //   // print('Response status: ${response.statusCode}');
-  //   // print('Response body: ${response.body}');
-  //   // print(response.body.runtimeType);
-
-  //   Map<String, dynamic> sobjects = jsonDecode(response.body);
-  //   List<dynamic> records = sobjects['records'];
-  //   List<String> objectsNames = [];
-  //   for(dynamic object in records){
-  //     print(object['DeveloperName']);
-  //     objectsNames.add(object['DeveloperName']);
-  //   }
-  //   print('names list >  ${objectsNames}');
-  //   await prefs.setStringList('key', objectsNames);
-
-    
-  //   print(prefs.getStringList('key'));
-
-  //   return objectsNames;
-  // }
   Future<String?> getDomain() async {
     final String? domain = await UserSecureStorage.getDomainName();
     return domain;
@@ -170,7 +130,6 @@ class _UserSettingsState extends State<UserSettings> {
           for(int i = 0; i<responseDecoded['records'].length; i++){
             objectNamesList.add(responseDecoded["records"][i]['DeveloperName']),
           },
-          print('<<<<'+objectNamesList.toString()),
           prefs.setStringList('key', objectNamesList),
         }),
       }
@@ -209,7 +168,7 @@ class _UserSettingsState extends State<UserSettings> {
               padding: const EdgeInsets.all(18.0),
               child: TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.yellow,
+                  backgroundColor: Colors.yellow.shade300,
                   foregroundColor: Colors.black54,
                   padding: const EdgeInsets.all(10.0),
                   textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
@@ -228,7 +187,7 @@ class _UserSettingsState extends State<UserSettings> {
               padding: const EdgeInsets.all(18.0),
               child: TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.yellow,
+                  backgroundColor: Colors.yellow.shade300,
                   foregroundColor: Colors.black54,
                   padding: const EdgeInsets.all(10.0),
                   textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),

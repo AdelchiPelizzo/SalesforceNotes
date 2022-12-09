@@ -44,6 +44,7 @@ dependencies:
   shared_preferences: ^2.0.15
   video_player: ^2.4.7
   flutter_launcher_icons: ^0.11.0
+  lottie: ^2.0.0
 
 # android min sdk min:16, default 21
 
@@ -74,6 +75,7 @@ flutter:
     - salesforce/salesforce_keys.txt
     - graphics/logo.png
     - assets/icon/icon.png
+    - assets/lottieFiles/lock.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
@@ -6,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:salesforcenotes/utils/user_secure_storage.dart';
 import 'package:salesforcenotes/views/create_new_note.dart';
 import 'package:salesforcenotes/views/user_settings.dart';
+import 'package:lottie/lottie.dart';
 
 void main() {
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -34,6 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    
     _username = TextEditingController();
     _password = TextEditingController();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -53,7 +58,6 @@ class _HomePageState extends State<HomePage> {
   Future<String> Login(String username, String password) async {
     String? identifier = await UserSecureStorage.getConsumerKey();
     String? secret = await UserSecureStorage.getConsumerSecret();
-
     final authorizationEndpoint =
         Uri.parse('https://login.salesforce.com/services/oauth2/token');
     var client = await oauth2.resourceOwnerPasswordGrant(
@@ -64,28 +68,7 @@ class _HomePageState extends State<HomePage> {
       secret: secret,
       basicAuth: false,
     );
-
     Map<String, dynamic> credentials = jsonDecode(client.credentials.toJson());
-
-    // final dataEndpoint = Uri(
-    //     scheme: 'https',
-    //     host: domainName,
-    //     path: 'services/data/v56.0/sobjects/MyNote__c');
-    // String accessToken = credentials['accessToken'];
-    // final response = await http.post(
-    //   dataEndpoint,
-    //   headers: <String, String>{
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer $accessToken',
-    //   },
-    //   body: '{"text__c": "from Flutter 2--33--45"}',
-    //   // body: jsonEncode(<String, String>{
-    //   //   'text__c': 'from Flutter 2--33--45',
-    //   // }
-    //   // ),
-    // );
-    // print('Response status: ${response.statusCode}');
-    // print('Response body: ${response.body}');
     return credentials['accessToken'];
   }
 
@@ -112,11 +95,17 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              height: 100,
-              width: 100,
-              child: Image.asset('assets/icon/icon.png'),
-            ),
+            Flexible(child: Lottie.asset(
+              'assets/lottieFiles/lock.json',
+              width: 200,
+              height: 200,
+              fit: BoxFit.fill,
+            )),
+            // SizedBox(
+            //   height: 100,
+            //   width: 100,
+            //   child: Image.asset('assets/icon/icon.png'),
+            // ),
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: TextField(
@@ -142,14 +131,15 @@ class _HomePageState extends State<HomePage> {
                   filled: true, //<-- SEE HERE
                   fillColor: Colors.white,
                   hintText: 'Password',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     onPressed: (() {
                       setState(() {
                         _isObscure = !_isObscure;
                       });
                     }),
-                    icon: Icon(_isObscure ?  Icons.visibility_off : Icons.visibility ),
+                    icon: Icon(
+                        _isObscure ? Icons.visibility_off : Icons.visibility),
                   ),
                 ),
               ),
@@ -158,11 +148,14 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(18.0),
               child: TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.yellow.shade100,
-                  foregroundColor: Colors.black54,
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.all(16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16), // <-- Radius
+                  ),
                   textStyle: const TextStyle(
-                      fontSize: 30, fontWeight: FontWeight.bold),
+                    fontSize: 30, fontWeight: FontWeight.bold),
                 ),
                 onPressed: () async {
                   //get consumer key and
