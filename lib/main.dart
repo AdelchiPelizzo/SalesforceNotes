@@ -38,7 +38,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    
     _username = TextEditingController();
     _password = TextEditingController();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -57,7 +56,9 @@ class _HomePageState extends State<HomePage> {
   // ignore: non_constant_identifier_names
   Future<String> Login(String username, String password) async {
     String? identifier = await UserSecureStorage.getConsumerKey();
+    print(identifier);
     String? secret = await UserSecureStorage.getConsumerSecret();
+    print(secret);
     final authorizationEndpoint =
         Uri.parse('https://login.salesforce.com/services/oauth2/token');
     var client = await oauth2.resourceOwnerPasswordGrant(
@@ -69,6 +70,7 @@ class _HomePageState extends State<HomePage> {
       basicAuth: false,
     );
     Map<String, dynamic> credentials = jsonDecode(client.credentials.toJson());
+    print(credentials['accessToken']);
     return credentials['accessToken'];
   }
 
@@ -174,6 +176,7 @@ class _HomePageState extends State<HomePage> {
                     MaterialPageRoute(
                         builder: (context) => const NewNote(
                               path: '',
+                              coord: [],
                             )),
                   );
                 },

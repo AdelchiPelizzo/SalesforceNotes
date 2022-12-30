@@ -1,28 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-
+import 'package:exif/exif.dart';
+import 'package:latlong_to_osgrid/latlong_to_osgrid.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:salesforcenotes/views/create_new_note.dart';
 import 'package:video_player/video_player.dart';
-
-// void main() {
-//   runApp(MyApp());
-
-// }
-
-// class AddMedia extends StatelessWidget {
-//   const AddMedia({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       child: const Text('Hello baby'),
-//       // home: MediaPage(title: 'Image Picker Example'),
-//     );
-//   }
-// }
 
 class AddMedia extends StatelessWidget {
   const AddMedia({super.key});
@@ -46,6 +30,126 @@ class MediaPage extends StatefulWidget {
 }
 
 class MediaPageState extends State<MediaPage> {
+
+  List<double> coordinates = [];
+  LatLongConverter converter = LatLongConverter();
+
+  Future<List<double>> printExifOf(String path) async {
+
+    final fileBytes = File(path).readAsBytesSync();
+    final data = await readExifFromBytes(fileBytes);
+
+    if (data.isEmpty) {
+      print("No EXIF information found");
+    }
+              //   for (final entry in data.entries) {
+              //   print("${entry.key}: ${entry.value}");
+              // }
+
+              // if (data.containsKey('JPEGThumbnail')) {
+              //   print('File has JPEG thumbnail');
+              //   data.remove('JPEGThumbnail');
+              // }
+              // if(data.containsKey('GPS')){
+      // for (final entry in data.entries) {
+              // print("${entry.key}: ${entry.value}");
+      // }
+              // }
+              // if (data.containsKey('TIFFThumbnail')) {
+              //   print('File has TIFF thumbnail');
+              //   data.remove('TIFFThumbnail');
+              // }
+    // void DmsToDecimalExample(var latDeg, var latMin, var latSec, var longDeg, var longMin, var longSec) {
+    //     double latDec = converter.getDecimalFromDegree(latDeg, latMin, latSec);
+    //     double longDec = converter.getDecimalFromDegree(longDeg, longMin, longSec);
+    //     // print("$latDec $longDec");
+    // }
+    String latOrientation = '';
+    for (final entry in data.entries) {
+      if(entry.key =='GPS GPSLatitudeRef'){
+        latOrientation = entry.value.toString();
+        // print('latOrientation 1 '+latOrientation+' <<< 1');
+      }
+    }
+
+    String lonOrientation = '';
+    for (final entry in data.entries) {
+      if(entry.key =='GPS GPSLongitudeRef'){
+        lonOrientation = entry.value.toString();
+        // print('lonOrientation 1 '+lonOrientation+ ' <<< 1');
+      }
+    }
+    for (final entry in data.entries) {
+      // if(entry.key =='GPS GPSLatitudeRef'){
+      //   latOrientation = entry.value.toString();
+      //   print('latOrientation 1 '+latOrientation+' <<< 1');
+      // }
+      // if(data.containsKey('GPS')){
+        // print("${entry.key}: ${entry.value}");
+      // }
+
+      if(entry.key =='GPS GPSLatitude'){
+        // print('latOrientation 2 '+latOrientation+' <<< 2' );
+        // print('Latititude in DEG '+ entry.value);
+        var latDEG = entry.value.values.toList();
+        // for(String s in latDEG){
+        //   print(" lat >>> "+s);
+        // }
+        var latGrades = double.parse(latDEG[0].toString());
+        var latMinutes = double.parse(latDEG[1].toString());
+        var latSecondsList = latDEG[2].toString().split('/');
+        var latSecondsDouble = int.parse(latSecondsList[0])/int.parse(latSecondsList[1]);
+        double latDecAbs = converter.getDecimalFromDegree(latGrades, latMinutes, latSecondsDouble);
+        double latDec;
+        if(latOrientation == "N"){
+          // print('latDecAbs '+latDecAbs.toString());
+          latDec = latDecAbs*1.00;
+          coordinates.add(latDec);
+        }else if( latOrientation == "S" ){
+          latDec = latDecAbs*-1.00;
+          coordinates.add(latDec);
+        }
+        // print(s);
+        // var sl = s.split('/');
+        // print(sl[0]);
+        // var GPSLatValuesString = entry.value.values.toList()[2].toString();
+        // var GPSLatValuesList = GPSLatValuesString.split('/');
+        // var longitude = int.parse(GPSLatValuesList[0])/int.parse(GPSLatValuesList[1]);
+        
+      }
+
+      if(entry.key == 'GPS GPSLongitude'){
+        
+        // print('lonOrientation 2 '+lonOrientation+' <<< 2' );
+        // print('Longitude in DEG '+entry.value.toString());
+        var lonDEG = entry.value.values.toList();
+        var lonGrades = double.parse(lonDEG[0].toString());
+        var lonMinutes = double.parse(lonDEG[1].toString());
+        var lonSecondsList = lonDEG[2].toString().split('/');
+        var lonSecondsDouble = int.parse(lonSecondsList[0])/int.parse(lonSecondsList[1]);
+        double lonDecAbs = converter.getDecimalFromDegree(lonGrades, lonMinutes, lonSecondsDouble);
+        double lonDec;
+        
+        if(lonOrientation == "E"){
+          lonDec = lonDecAbs*1.00;
+          coordinates.add(lonDec);
+        }else if( lonOrientation == "W" ){
+          print('lonDecAbs '+lonDecAbs.toString());
+          lonDec = lonDecAbs*-1.00;
+          coordinates.add(lonDec);
+        }
+
+
+        // print("${entry.key}: ${entry.value}");
+        // var GPSLonValuesString = entry.value.values.toList()[2].toString();
+        // var GPSLonValuesList = GPSLonValuesString.split('/');
+        // var longitude = int.parse(GPSLonValuesList[0])/int.parse(GPSLonValuesList[1]);
+      }
+    }
+    print('coordinates '+coordinates.toString());
+    return coordinates;
+  }
+
   List<XFile>? _imageFileList;
 
   set _imageFile(XFile? value) {
@@ -87,8 +191,6 @@ class MediaPageState extends State<MediaPage> {
       setState(() {});
     }
   }
-
-  
 
   void _onImageButtonPressed(
     ImageSource source,
@@ -133,10 +235,13 @@ class MediaPageState extends State<MediaPage> {
           setState(() {
             _imageFile = pickedFile;
             if (pickedFile != null) {
+              printExifOf(pickedFile.path);
+              // Uint8List unitData =  pickedFile.openRead() as Uint8List;
+              // Future<dynamic> fStream = StreamConsumer.addStream(stream);
                Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NewNote(path: pickedFile.path.toString()),
+                  builder: (context) => NewNote(path: pickedFile.path.toString(), coord: coordinates),
                 ),
               );
             }

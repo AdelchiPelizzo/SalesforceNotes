@@ -73,6 +73,9 @@ class _UserSettingsState extends State<UserSettings> {
         'Authorization': 'Bearer $accessToken',
       },
     );
+    print(uri);
+    print(accessToken);
+    print(response.body);
 
     List<String> objectsId = [];
     Map responseDecoded = jsonDecode(response.body);
@@ -177,10 +180,11 @@ class _UserSettingsState extends State<UserSettings> {
                   //get consumer key and secret.
                   final key = _key.text;
                   final secret = _secret.text;
-                  final domain = _domain.text;
+                  final domain = '${_domain.text}.my.salesforce.com';
+                  print(domain);
                   UserSecureStorage.setAppData(key, secret, domain);
                 },
-                child: const Text('Set Consumer key and secret'),
+                child: const Text('Save API data'),
               ),
             ),
              Padding(

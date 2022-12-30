@@ -3,17 +3,21 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:lottie/lottie.dart';
 import 'package:salesforcenotes/views/media.dart';
+import 'package:salesforcenotes/views/notes_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/user_secure_storage.dart';
 import '/utils/metadata_salesforce.dart';
 
 class NewNote extends StatefulWidget {
+  // final XFile? xf;
+  final List<double> coord;
   final String path;
   const NewNote({
     super.key,
     required this.path,
+    required this.coord,
+    // required this.xf,
   });
 
   @override
@@ -28,6 +32,7 @@ class _NewNoteState extends State<NewNote> {
   late final List<XFile>? _images;
   late final ImagePicker _picker;
   late final String _mediaPath;
+  List<double> coordinates = [];
   String objectName = '';
   late Future<List<String>?> objectNames;
   late final MetadataSalesforce mds;
@@ -49,6 +54,7 @@ class _NewNoteState extends State<NewNote> {
     _fileNameController = TextEditingController();
     _picker = ImagePicker();
     _mediaPath = widget.path;
+    coordinates = widget.coord;
     objectNames = getSObjectsList();
     mds = MetadataSalesforce();
     super.initState();
@@ -69,7 +75,6 @@ class _NewNoteState extends State<NewNote> {
 
   getMetadataFromSalesforce() {
     mds.getObjectNames();
-    // mds.getTableEnumOrId();
   }
 
   bool res = true;
@@ -95,7 +100,7 @@ class _NewNoteState extends State<NewNote> {
               onPressed: () => {
                 res = false,
                 Navigator.pop(context, 'Cancel'),
-                },
+              },
               // onPressed: () => Navigator.pop(context, 'Cancel'),
               child: const Text('Cancel'),
             ),
@@ -158,12 +163,13 @@ class _NewNoteState extends State<NewNote> {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
       },
-      body: '{"text__c": "$note"}',
+      body:
+          '{"text__c": "$note", "Location__Latitude__s": "${coordinates[0].toDouble()}", "Location__Longitude__s": "${coordinates[1].toDouble()}"}',
     );
 
     if (_mediaPath == '') {
       await _showMyDialog('Media Not present');
-      if(res == false){
+      if (res == false) {
         return;
       }
     }
@@ -208,13 +214,76 @@ class _NewNoteState extends State<NewNote> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create New Note'),
-        actions: [
-          IconButton(
-            onPressed: () => {},
-            // icon: Flexible(child: Lottie.asset('')),
-            icon: const Icon(Icons.create),
-          )
+        title: const Text(''),
+        actions: <Widget>[
+          FutureBuilder<List<String>?>(
+            future: objectNames,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 50 ),
+                  child: SizedBox(
+                    width: 180,
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        filled: true,
+                        fillColor: Colors.blue,
+                        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                        // enabledBorder: OutlineInputBorder(
+                        //     borderSide: BorderSide(color: Colors.white)),
+                        // border: OutlineInputBorder(
+                        //     borderSide: BorderSide(color: Colors.purple)),
+                      ),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        backgroundColor: Colors.blue,
+                      ),
+                      isExpanded: true,
+                      icon: const Icon(
+                        Icons.arrow_downward_outlined,
+                        color: Colors.white,
+                      ),
+                      hint: const Text(
+                        'Select an object',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      // value: objectName,
+                      items: snapshot.data
+                          ?.map((value) => DropdownMenuItem(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    backgroundColor: Colors.blue,
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        objectName = value.toString();
+                        setState(() {
+                          objectName = value.toString();
+                        });
+                      },
+                    ),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+              return const CircularProgressIndicator();
+            },
+          ),
+          // IconButton(
+          //   onPressed: () => {},
+          //   icon: const Icon(Icons.create),
+          // )
         ],
       ),
       body: Center(
@@ -264,128 +333,153 @@ class _NewNoteState extends State<NewNote> {
               keyboardType: TextInputType.text,
             ),
           ),
-          // const SizedBox(height: 15),
-          // ElevatedButton(
-          //   style: ElevatedButton.styleFrom(
-          //       textStyle: const TextStyle(fontSize: 20)),
-          //   // onPressed: getMetadataFromSalesforce,s
-          //   onPressed: sendNote,
-          //   child: const Text('Send Note'),
-          // ),
-          // const SizedBox(height: 30),
-          // const Text('Object Selected'),
           // Text(
-          //   objectName,
+          //   coordinates.toString(),
           //   style: const TextStyle(fontSize: 30),
           // ),
           const SizedBox(height: 15),
-          // OutlinedButton(
-          //     style: OutlinedButton.styleFrom(
-          //     shape: const StadiumBorder(),
-          //     side: const BorderSide(
-          //       width: 2,
-          //       color: Colors.blue,
-          //     ),
-          //   ),
-          //   onPressed: sendNote,
-          //   child: const Text('Send Note'),
+          if (widget.path != '')
+            Flexible(
+              child: Image.file(File(widget.path)),
+            ),
+          const SizedBox(height: 15),
+          // FutureBuilder<List<String>?>(
+          //   future: objectNames,
+          //   builder: (context, snapshot) {
+          //     if (snapshot.hasData) {
+          //       return SizedBox(
+          //         width: 220,
+          //         child: DropdownButtonFormField<String>(
+          //           decoration: const InputDecoration(
+          //               contentPadding:
+          //                   EdgeInsets.symmetric(vertical: 0, horizontal: 9),
+          //               enabledBorder: OutlineInputBorder(
+          //                   borderSide: BorderSide(color: Colors.black12)),
+          //               border: OutlineInputBorder(
+          //                   borderSide: BorderSide(color: Colors.purple))),
+          //           style: const TextStyle(fontSize: 18, color: Colors.black),
+          //           icon: const Icon(
+          //             Icons.arrow_downward_outlined,
+          //           ),
+          //           hint: const Text('Select an object'),
+          //           // value: objectName,
+          //           items: snapshot.data
+          //               ?.map((value) => DropdownMenuItem(
+          //                     value: value,
+          //                     child: Text(value),
+          //                   ))
+          //               .toList(),
+          //           onChanged: (value) {
+          //             objectName = value.toString();
+          //             setState(() {
+          //               objectName = value.toString();
+          //             });
+          //           },
+          //         ),
+          //       );
+          //     } else if (snapshot.hasError) {
+          //       return Text("${snapshot.error}");
+          //     }
+          //     return const CircularProgressIndicator();
+          //   },
           // ),
-          if (widget.path != '') Flexible(
-              // child: Padding(
-              //   padding: const EdgeInsets.all(1.0),
-              // child: Expanded(
-                child: Image.file(File(widget.path)),
-              // ),
-            // )
-          ),
           const SizedBox(height: 15),
-          FutureBuilder<List<String>?>(
-            future: objectNames,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return SizedBox(
-                  width: 220,
-                  child: DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                        contentPadding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 9),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black12)),
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.purple))),
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
-                    icon: const Icon(
-                      Icons.arrow_downward_outlined,
-                    ),
-                    hint: const Text('Select an object'),
-                    // value: objectName,
-                    items: snapshot.data
-                        ?.map((value) => DropdownMenuItem(
-                              value: value,
-                              child: Text(value),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      objectName = value.toString();
-                      setState(() {
-                        objectName = value.toString();
-                      });
-                    },
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
-              return const CircularProgressIndicator();
-            },
-          ),
-          const SizedBox(height: 15),
+          // Text(xf.toString()),
         ]),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: ((context) => const AddMedia())));
-      //   },
-      //   heroTag: 'image0',
-      //   tooltip: 'Pick Image from gallery',
-      //   child: const Icon(Icons.add_a_photo),
-      // ),
-      floatingActionButton:FloatingActionButton( //Floating action button on Scaffold
-          onPressed: sendNote,
-          child: const Icon(Icons.send), //icon inside button
+      floatingActionButton: FloatingActionButton(
+        //Floating action button on Scaffold
+        onPressed: sendNote,
+        child: const Icon(Icons.send), //icon inside button
       ),
-
-  floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-  //floating action button position to right
-
-  bottomNavigationBar: BottomAppBar( //bottom navigation bar on scaffold
-    color:Colors.redAccent,
-    shape: const CircularNotchedRectangle(), //shape of notch
-    notchMargin: 5, //notche margin between floating button and bottom appbar
-    child: Row( //children inside bottom appbar
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(left:90),
-          child: IconButton(icon: const Icon(Icons.photo, color: Colors.white,), onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: ((context) => const AddMedia())));
-            },
-          ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      bottomNavigationBar: BottomAppBar(
+        //bottom navigation bar on scaffold
+        color: Colors.redAccent,
+        shape: const CircularNotchedRectangle(), //shape of notch
+        notchMargin:
+            5, //notche margin between floating button and bottom appbar
+        child: Row(
+          //children inside bottom appbar
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(left: 1),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.photo,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddMedia(),
+                      ));
+                },
+              ),
+            ),
+            // FutureBuilder<List<String>?>(
+            //   future: objectNames,
+            //   builder: (context, snapshot) {
+            //     if (snapshot.hasData) {
+            //       return SizedBox(
+            //         width: 180,
+            //         child: DropdownButtonFormField<String>(
+            //           decoration: const InputDecoration(
+            //               contentPadding:
+            //                   EdgeInsets.symmetric(vertical: 0, horizontal: 9),
+            //               enabledBorder: OutlineInputBorder(
+            //                   borderSide: BorderSide(color: Colors.black12)),
+            //               border: OutlineInputBorder(
+            //                   borderSide: BorderSide(color: Colors.purple))),
+            //           style: const TextStyle(fontSize: 18, color: Colors.black),
+            //           icon: const Icon(
+            //             Icons.arrow_downward_outlined,
+            //           ),
+            //           hint: const Text('Select an object'),
+            //           // value: objectName,
+            //           items: snapshot.data
+            //               ?.map((value) => DropdownMenuItem(
+            //                     value: value,
+            //                     child: Text(value),
+            //                   ))
+            //               .toList(),
+            //           onChanged: (value) {
+            //             objectName = value.toString();
+            //             setState(() {
+            //               objectName = value.toString();
+            //             });
+            //           },
+            //         ),
+            //       );
+            //     } else if (snapshot.hasError) {
+            //       return Text("${snapshot.error}");
+            //     }
+            //     return const CircularProgressIndicator();
+            //   },
+            // ),
+            Padding(
+              padding: const EdgeInsets.only(right: 80),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.list,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  print(objectName);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NotesList(objName: objectName),
+                      ));
+                },
+              ),
+            )
+          ],
         ),
-        // IconButton(icon: const Icon(Icons.search, color: Colors.white,), onPressed: () {},),
-        // IconButton(icon: const Icon(Icons.print, color: Colors.white,), onPressed: () {},),
-        Padding(
-          padding: const EdgeInsets.only(right:90),
-          child:IconButton(icon: const Icon(Icons.people, color: Colors.white,), onPressed: () {},),
-        )
-      ],
-    ),
-  ),
+      ),
     );
   }
 }
